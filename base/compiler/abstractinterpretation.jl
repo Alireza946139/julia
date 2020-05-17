@@ -2302,6 +2302,20 @@ function abstract_call_known(interp::AbstractInterpreter, @nospecialize(f),
     elseif f === UnionAll
         call = abstract_call_gf_by_type(interp, f, ArgInfo(nothing, Any[Const(UnionAll), Any, Any]), si, Tuple{Type{UnionAll}, Any, Any}, sv, max_methods)
         return abstract_call_unionall(interp, argtypes, call)
+    elseif f === _typeof_captured_variable && la == 2
+        t = argtypes[2]
+        if t isa Const
+            tv = t.val
+            rt = Const(has_free_typevars(tv) ? typeof(tv) : Core.Typeof(tv))
+        elseif isType(t)
+            tv = t.parameters[1]
+            rt = Const(has_free_typevars(tv) ? typeof(tv) : Core.Typeof(tv))
+        elseif !hasintersect(widenconst(t), Type)
+            rt = typeof_tfunc(𝕃ᵢ, t)
+        else
+            rt = DataType
+        end
+        return CallMeta(rt, Bottom, EFFECTS_TOTAL, MethodResultPure())
     elseif f === Tuple && la == 2
         aty = argtypes[2]
         ty = isvarargtype(aty) ? unwrapva(aty) : widenconst(aty)

@@ -451,9 +451,12 @@ abstract type CallInfo end
 nsplit(info::CallInfo) = nsplit_impl(info)::Union{Nothing,Int}
 getsplit(info::CallInfo, idx::Int) = getsplit_impl(info, idx)::MethodLookupResult
 getresult(info::CallInfo, idx::Int) = getresult_impl(info, idx)
+add_uncovered_edges!(edges::Vector{Any}, info::CallInfo, @nospecialize(atype)) = add_uncovered_edges_impl(edges, info, atype)
+
 
 nsplit_impl(::CallInfo) = nothing
 getsplit_impl(::CallInfo, ::Int) = error("unexpected call into `getsplit`")
 getresult_impl(::CallInfo, ::Int) = nothing
+add_uncovered_edges_impl(edges::Vector{Any}, info::CallInfo, @nospecialize(atype)) = nothing
 
 @specialize
